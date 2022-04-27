@@ -154,6 +154,25 @@ function productReducer(state = initialState, action: ActionI) {
       };
       return state;
 
+    case "RESET_PRODUCT_ADD":
+      state = {
+        ...state,
+        addingStatus: {
+          ...state.addingStatus,
+          success: false,
+        },
+      };
+      return state;
+
+    case "RESET_PRODUCT_EDIT":
+      state = {
+        ...state,
+        edit: {
+          ...state.edit,
+          success: false,
+        },
+      };
+
     default:
       return state;
   }

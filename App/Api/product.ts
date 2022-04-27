@@ -1,9 +1,33 @@
+import {
+  collection,
+  deleteDoc,
+  doc,
+  getDoc,
+  getDocs,
+  getFirestore,
+  setDoc,
+  updateDoc,
+} from "firebase/firestore";
+import {
+  getDownloadURL,
+  getStorage,
+  ref,
+  uploadBytesResumable,
+} from "firebase/storage";
+import { getId, uriToBlob } from "./utils";
 export interface ProductsI {
   id: string;
   name: string;
   image: string;
-  offerPrice: number;
-  price: number;
+  imageBlob: ImageI;
+  price: string;
+  offerprice: string;
+}
+
+export interface ImageI {
+  uri: string;
+  name: string;
+  changed: boolean;
 }
 
 export interface ApiResponseI {
@@ -12,50 +36,123 @@ export interface ApiResponseI {
   description: string;
 }
 
-const products: ProductsI[] = [
-  {
-    id: "sdkjbgsjdgbs",
-    name: "Keyboard",
-    image: "",
-    offerPrice: 1350,
-    price: 1500,
-  },
-];
-
 export function getProducts(): Promise<ProductsI[]> {
-  return new Promise((resolve, reject) => {
-    console.log("Fetching Porikdyc");
+  return new Promise(async (resolve, reject) => {
+    const db = getFirestore();
+    const products: ProductsI[] = [];
+    const querySnapshot = await getDocs(collection(db, "products"));
+    querySnapshot.forEach((child: any) => {
+      products.push(child.data());
+    });
     resolve(products);
-    // reject("Something Went wrong");
   });
 }
 
 export function addProduct(product: ProductsI): Promise<ApiResponseI> {
   return new Promise((resolve, reject) => {
-    console.log(product);
-    // resolve({
-    //   statusCode: 200,
-    //   message: "Product added successfully",
-    //   description: "",
-    // });
-    reject("Something went wrong");
+    const db = getFirestore();
+    const id = getId(12);
+    uploadToStorage(product.imageBlob)
+      .then((imageUrl) => {
+        setDoc(doc(db, "products", id), { ...product, image: imageUrl, id: id })
+          .then(() => {
+            resolve({
+              statusCode: 200,
+              message: "Product Added",
+              description: "",
+            });
+          })
+          .catch((err) => {
+            reject(err.code);
+          });
+      })
+      .catch((err) => {
+        reject(err);
+      });
   });
 }
 
-export function editProduct(product: ProductsI): Promise<ApiResponseI> {
-  console.log(product);
+const uploadToStorage = (imageUri: ImageI) => {
   return new Promise((resolve, reject) => {
-    resolve({
-      statusCode: 200,
-      message: "Product edited successfully",
-      description: "",
+    uriToBlob(imageUri.uri).then((blob: any) => {
+      const storage = getStorage();
+      const storageRef = ref(storage, "images/" + imageUri.name);
+      const uploadTask = uploadBytesResumable(storageRef, blob);
+      uploadTask.on(
+        "state_changed",
+        () => {},
+        (error) => {
+          reject(error.code);
+        },
+        () => {
+          getDownloadURL(uploadTask.snapshot.ref).then((url) => {
+            resolve(url);
+          });
+        }
+      );
     });
-    // reject("Something went wrong");
+  });
+};
+
+export function editProduct(product: ProductsI): Promise<ApiResponseI> {
+  return new Promise((resolve, reject) => {
+    const db = getFirestore();
+    const productRef = doc(db, "products", product.id);
+    if (product.imageBlob.changed) {
+      uploadToStorage(product.imageBlob)
+        .then((imageUrl) => {
+          updateDoc(productRef, { ...product, image: imageUrl }).then(() => {
+            resolve({
+              statusCode: 200,
+              message: "Product Updated",
+              description: "",
+            });
+          });
+        })
+        .catch((err) => {
+          reject(err.code);
+        });
+    } else {
+      updateDoc(productRef, { ...product })
+        .then(() => {
+          resolve({
+            statusCode: 200,
+            message: "Product Updated",
+            description: "",
+          });
+        })
+        .catch((err) => {
+          reject(err.code);
+        });
+    }
+  });
+}
+
+export function getProduct(productId: string): Promise<ProductsI> {
+  return new Promise((resolve, reject) => {
+    const db = getFirestore();
+    const docRef = doc(db, "products", productId);
+    getDoc(docRef).then((snapshot: any) => {
+      if (snapshot.exists()) {
+        resolve(snapshot.data());
+      }
+    });
   });
 }
 
 export function deleteProduct(productId: string): Promise<ApiResponseI> {
   return new Promise((resolve, reject) => {
-    resolve({ statusCode: 200, message: "Product Deleted", description: "" });
+    const db = getFirestore();
+    deleteDoc(doc(db, "products", productId))
+      .then((response) => {
+        resolve({
+          statusCode: 200,
+          message: "Product Deleted",
+          description: "",
+        });
+      })
+      .catch((err) => {
+        reject(err.code);
+      });
   });
 }

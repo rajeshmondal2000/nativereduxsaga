@@ -1,9 +1,16 @@
-import { View, Text } from "react-native";
+import {
+  View,
+  Text,
+  VirtualizedList,
+  StyleSheet,
+  StatusBar,
+} from "react-native";
 import React, { useEffect } from "react";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { ActionI, StateI } from "../redux";
 import { connect } from "react-redux";
 import { ProductsI } from "../api/product";
-import { Button } from "native-base";
+import { Button, Image } from "native-base";
 
 interface ProductListProps {
   products: ProductsI[];
@@ -32,6 +39,39 @@ const ProductList: React.FC<ProductListProps> = ({
     navigation.navigate("editproduct", { productId });
   };
 
+  const getItem = (data: ProductsI[], index: number) => data[index];
+
+  const getItemCount = (data: ProductsI) => products.length;
+
+  const Item = ({ product }: { product: ProductsI }) => (
+    <View style={{ flexDirection: "row", marginBottom: 12 }}>
+      <Image
+        source={{ uri: product.image }}
+        style={{ borderRadius: 12 }}
+        size={"xl"}
+      />
+      <View style={{ paddingLeft: 12 }}>
+        <Text style={{ fontSize: 20 }}>{product.name}</Text>
+        <Text>Price - Rs. {product.price}</Text>
+        <Text style={{ marginBottom: 12 }}>
+          Offer Price - {product.offerprice}
+        </Text>
+        <View style={{ flexDirection: "row" }}>
+          <Button colorScheme={"red"} onPress={() => deleteProduct(product.id)}>
+            Delete
+          </Button>
+          <Button
+            onPress={() => _editProduct(product.id)}
+            colorScheme={"indigo"}
+            style={{ marginLeft: 12 }}
+          >
+            Edit Product
+          </Button>
+        </View>
+      </View>
+    </View>
+  );
+
   if (fetchingError) {
     return (
       <View>
@@ -40,13 +80,48 @@ const ProductList: React.FC<ProductListProps> = ({
     );
   } else {
     return (
-      <View>
-        <Text>{products.length}</Text>
-        <Button onPress={() => _editProduct("jvgjvjv")}>Edit Product</Button>
+      <View style={styles.container}>
+        <Text
+          style={{
+            fontSize: 20,
+            fontWeight: "bold",
+            textAlign: "center",
+          }}
+        >
+          Products
+        </Text>
+        <SafeAreaView>
+          <VirtualizedList
+            data={products}
+            initialNumToRender={10}
+            renderItem={({ item }: { item: ProductsI }) => (
+              <Item product={item} />
+            )}
+            getItem={getItem}
+            keyExtractor={(item) => item.id}
+            getItemCount={getItemCount}
+          />
+        </SafeAreaView>
       </View>
     );
   }
 };
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 12,
+    flex: 1,
+    paddingTop: StatusBar.currentHeight,
+  },
+  formContainer: {
+    paddingTop: 6,
+    paddingBottom: 6,
+  },
+  label: {
+    paddingBottom: 6,
+    fontWeight: "600",
+  },
+});
 
 const mapStateToProps = (state: StateI) => {
   return {

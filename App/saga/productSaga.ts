@@ -44,6 +44,7 @@ function* deleteProductRequest(action: ActionI) {
   try {
     const response: ApiResponseI = yield call(deleteProduct, action.payload);
     yield put({ type: "PRODUCT_DELETE_SUCCESS", payload: null });
+    yield put({ type: "PRODUCT_FETCHING_REQUEST", payload: null });
   } catch (e) {
     yield put({ type: "PRODUCT_DELETE_ERROR", payload: e });
   }
