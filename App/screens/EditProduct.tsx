@@ -1,7 +1,7 @@
 import { View, Text } from "react-native";
 import React from "react";
 import { ActionI, StateI } from "../redux";
-import { ProductsI } from "../Api/product";
+import { ProductsI } from "../api/product";
 import { connect } from "react-redux";
 import { Button } from "native-base";
 

@@ -2,7 +2,7 @@ import { View, Text } from "react-native";
 import React, { useEffect } from "react";
 import { ActionI, StateI } from "../redux";
 import { connect } from "react-redux";
-import { ProductsI } from "../Api/product";
+import { ProductsI } from "../api/product";
 import { Button } from "native-base";
 
 interface ProductListProps {

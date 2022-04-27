@@ -1,5 +1,5 @@
 import { ActionI } from ".";
-import { ProductsI } from "../Api/product";
+import { ProductsI } from "../api/product";
 
 export interface ProductInitialState {
   products: Array<ProductsI>;

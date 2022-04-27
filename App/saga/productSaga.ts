@@ -5,7 +5,7 @@ import {
   editProduct,
   getProducts,
   ProductsI,
-} from "../Api/product";
+} from "../api/product";
 import { ActionI } from "../redux";
 
 function* fetchProduct(action: ActionI) {
