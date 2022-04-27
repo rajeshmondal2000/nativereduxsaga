@@ -10,6 +10,7 @@ interface ProductListProps {
   fetchingError: boolean;
   fetchingErrorMsg: string;
   fetchProducts: () => void;
+  deleteProduct: (productId: string) => void;
   navigation: {
     navigate: any;
   };
@@ -21,6 +22,7 @@ const ProductList: React.FC<ProductListProps> = ({
   fetchingError,
   fetchingErrorMsg,
   navigation,
+  deleteProduct,
 }) => {
   useEffect(() => {
     fetchProducts();
@@ -58,6 +60,8 @@ const mapDispatchToProps = (dispatch: (action: ActionI) => void) => {
   return {
     fetchProducts: () =>
       dispatch({ type: "PRODUCT_FETCHING_REQUEST", payload: null }),
+    deleteProduct: (productId: string) =>
+      dispatch({ type: "PRODUCT_DELETE_REQUEST", payload: productId }),
   };
 };
 

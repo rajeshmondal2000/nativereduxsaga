@@ -19,6 +19,11 @@ export interface ProductInitialState {
     editingError: string;
     success: boolean;
   };
+  delete: {
+    errorInDelete: boolean;
+    deleteError: string;
+    success: boolean;
+  };
 }
 
 const initialState: ProductInitialState = {
@@ -38,6 +43,11 @@ const initialState: ProductInitialState = {
     errorInEditing: false,
     success: false,
     editingError: "",
+  },
+  delete: {
+    errorInDelete: false,
+    deleteError: "",
+    success: false,
   },
 };
 
@@ -119,6 +129,27 @@ function productReducer(state = initialState, action: ActionI) {
           isEditing: false,
           editingError: action.payload,
           errorInEditing: true,
+        },
+      };
+      return state;
+
+    case "PRODUCT_DELETE_SUCCESS":
+      state = {
+        ...state,
+        delete: {
+          ...state.delete,
+          success: true,
+        },
+      };
+      return state;
+
+    case "PRODUCT_DELETE_ERROR":
+      state = {
+        ...state,
+        delete: {
+          ...state.delete,
+          errorInDelete: true,
+          deleteError: action.payload,
         },
       };
       return state;

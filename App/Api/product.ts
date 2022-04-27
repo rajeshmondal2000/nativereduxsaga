@@ -24,7 +24,7 @@ const products: ProductsI[] = [
 
 export function getProducts(): Promise<ProductsI[]> {
   return new Promise((resolve, reject) => {
-    console.log("Fetching Porikdyc")
+    console.log("Fetching Porikdyc");
     resolve(products);
     // reject("Something Went wrong");
   });
@@ -51,5 +51,11 @@ export function editProduct(product: ProductsI): Promise<ApiResponseI> {
       description: "",
     });
     // reject("Something went wrong");
+  });
+}
+
+export function deleteProduct(productId: string): Promise<ApiResponseI> {
+  return new Promise((resolve, reject) => {
+    resolve({ statusCode: 200, message: "Product Deleted", description: "" });
   });
 }
